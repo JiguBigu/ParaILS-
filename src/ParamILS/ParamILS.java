@@ -31,6 +31,7 @@ public class ParamILS {
         public double PM;
         public int POSIZE;
         public int G5;
+        public double wasteTime = Double.MAX_VALUE;
 
         public Config(double PC, double PM, int POSIZE, int g5) {
             this.PC = PC;
@@ -103,7 +104,8 @@ public class ParamILS {
                 ilsConfig = config[random.nextInt(625)];
             }
             count ++;
-        }while (count < 100);
+            System.out.println("process:" + (count + 1)/10.0 + "...");
+        }while (count < 1000);
         return ilsConfig;
     }
 
@@ -114,20 +116,31 @@ public class ParamILS {
      * @return
      */
     public boolean better(Config a, Config b){
-        GAThread thread1 = new GAThread();
-        GAThread thread2 = new GAThread();
-        thread1.setConfig(a.PC, a.PM, a.POSIZE, a.G5);
-        thread2.setConfig(b.PC, b.PM, b.POSIZE, b.G5);
-        thread1.start();
-        thread2.start();
-        while (thread1.getState() != TERMINATED || thread2.getState() != TERMINATED){}
-        boolean isBetter = false;
-        isBetter = thread1.getWasteTime() > thread2.getWasteTime() ? false : true;
-        return isBetter;
+        if(getConfigRuningTime(a) != Double.MAX_VALUE && getConfigRuningTime(b) != Double.MAX_VALUE){
+            return a.wasteTime < b.wasteTime;
+        }else if(getConfigRuningTime(a) != Double.MAX_VALUE && getConfigRuningTime(b) == Double.MAX_VALUE){
+            GAThread thread = new GAThread();
+            thread.setConfig(b.PC, b.PM, b.POSIZE, b.G5);
+            while (thread.getState() != TERMINATED){}
+            return a.wasteTime < thread.getWasteTime();
+        }else if(getConfigRuningTime(a) == Double.MAX_VALUE && getConfigRuningTime(b) != Double.MAX_VALUE){
+            GAThread thread = new GAThread();
+            thread.setConfig(a.PC, a.PM, a.POSIZE, a.G5);
+            while (thread.getState() != TERMINATED){}
+            return thread.getWasteTime() < b.wasteTime;
+        }else {
+            GAThread thread1 = new GAThread();
+            GAThread thread2 = new GAThread();
+            thread1.setConfig(a.PC, a.PM, a.POSIZE, a.G5);
+            thread2.setConfig(b.PC, b.PM, b.POSIZE, b.G5);
+            thread1.start();
+            thread2.start();
+            while (thread1.getState() != TERMINATED || thread2.getState() != TERMINATED){}
+            return thread1.getWasteTime() < thread2.getWasteTime();
+        }
     }
 
     public Config iterativeFirstImprovement(Config config){
-        System.out.println("runing iterative search...");
         Config config1 = new Config(config.PC, config.PM, config.POSIZE, config.G5);
         int count = 0;
         do {
@@ -157,29 +170,46 @@ public class ParamILS {
         return config1;
     }
 
-    public static void main(String[] args) {
-//        ParamILS paramILS = new ParamILS();
-//        System.out.println(paramILS.run());
+    public void setConfigRuningTime(Config config1){
+        for (Config config2: config){
+            if(config2.equals(config1)){
+                config2.wasteTime = config1.wasteTime;
+            }
+        }
+    }
 
-        GAThread thread1 = new GAThread();
-        GAThread thread2 = new GAThread();
-        thread1.setConfig(0.8, 0.1, 200, 500);
-        thread2.setConfig(0.8, 0.005, 100, 500);
-        thread1.start();
-        thread2.start();
-        while (thread1.getState() != TERMINATED || thread2.getState() != TERMINATED){}
-        System.out.println("经验值");
-        System.out.println("测试集运行时间：" + thread1.getWasteTime()/1000);
-        Individual[] individuals = thread1.getBest();
-        for(int i = 0; i < 3; i++){
-            System.out.println(individuals[i].getTime());
+    public double getConfigRuningTime(Config config1){
+        for (Config config2 : config) {
+            if(config2.equals(config1)){
+                return config2.wasteTime;
+            }
         }
-        System.out.println();
-        System.out.println("实验值");
-        System.out.println("测试集运行时间：" + thread2.getWasteTime()/1000);
-        individuals = thread2.getBest();
-        for(int i = 0; i < 3; i++){
-            System.out.println(individuals[i].getTime());
-        }
+        return Double.MAX_VALUE;
+    }
+
+    public static void main(String[] args) {
+        ParamILS paramILS = new ParamILS();
+        System.out.println(paramILS.run());
+
+//        GAThread thread1 = new GAThread();
+//        GAThread thread2 = new GAThread();
+//        thread1.setConfig(0.8, 0.1, 200, 500);
+//        thread2.setConfig(0.8, 0.005, 100, 500);
+//        thread1.start();
+//        thread2.start();
+//        while (thread1.getState() != TERMINATED || thread2.getState() != TERMINATED){}
+//        System.out.println("经验值");
+//        System.out.println("测试集运行时间：" + thread1.getWasteTime()/1000);
+//        Individual[] individuals = thread1.getBest();
+//        for(int i = 0; i < 3; i++){
+//            System.out.println(individuals[i].getTime());
+//        }
+//        System.out.println();
+//        System.out.println("实验值");
+//        System.out.println("测试集运行时间：" + thread2.getWasteTime()/1000);
+//        individuals = thread2.getBest();
+//        for(int i = 0; i < 3; i++){
+//            System.out.println(individuals[i].getTime());
+//        }
     }
 }

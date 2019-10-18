@@ -12,16 +12,16 @@ public class GAThread extends Thread{
     private int G;
     private double wasteTime;
     private String[] fileList= {
-            /*"G:\\Brandimarte_Data\\Text\\Mk01.fjs",
+            "G:\\Brandimarte_Data\\Text\\Mk01.fjs",
             "G:\\Brandimarte_Data\\Text\\Mk02.fjs",
             "G:\\Brandimarte_Data\\Text\\Mk03.fjs",
             "G:\\Brandimarte_Data\\Text\\Mk04.fjs",
             "G:\\Brandimarte_Data\\Text\\Mk05.fjs",
             "G:\\Brandimarte_Data\\Text\\Mk06.fjs",
-            "G:\\Brandimarte_Data\\Text\\Mk07.fjs"*/
-            "G:\\Brandimarte_Data\\Text\\Mk08.fjs",
-            "G:\\Brandimarte_Data\\Text\\Mk09.fjs",
-            "G:\\Brandimarte_Data\\Text\\Mk10.fjs"
+            "G:\\Brandimarte_Data\\Text\\Mk07.fjs"
+//            "G:\\Brandimarte_Data\\Text\\Mk08.fjs",
+//            "G:\\Brandimarte_Data\\Text\\Mk09.fjs",
+//            "G:\\Brandimarte_Data\\Text\\Mk10.fjs"
     };
 
 
